@@ -19,7 +19,8 @@ While loop
 - Select() has three timeouts
   - Always waiting - setting timeout to NULL will make select always wait for an event
   - Wait untill "timeout" - This is set in the timeval struct
-  - Don't wait - If tv_sec and tv_usec in the timeval struct is set to 0 the select will immediately check the descriptors
+  - Don't wait - If tv_sec and tv_usec in the timeval struct is set to 0 the 
+    select will immediately check the descriptors
     - returns positive number indicating a descriptor is ready
     - returns 0 if timeout (Only if a timeout is specified)
     - returns -1 on error
