@@ -17,15 +17,15 @@ main(int argc, char*argv[]){
       int rc;
 
       // create socket connections
-    	Client *RXdata = new Client(connectionIP,7008);
+    	Client *Client = new Client(connectionIP,7008);
       // set each socket to non-blocking mode
-      rc = fcntl(RXdata->GetSocket(),F_SETFL,O_NONBLOCK);
+      rc = fcntl(Client->GetSocket(),F_SETFL,O_NONBLOCK);
     	if (rc < 0){
 	    	 perror("Error setting socket to non-blocking");
 	    	exit(3);
     	}
-	    Client *TXdata = new Client(connectionIP, 7005);
-      rc = fcntl(TXdata->GetSocket(),F_SETFL,O_NONBLOCK);
+	    Client *Server = new Client(connectionIP, 7005);
+      rc = fcntl(Server->GetSocket(),F_SETFL,O_NONBLOCK);
     	if (rc < 0){
 	    	 perror("Error setting socket to non-blocking");
 	    	exit(3);
@@ -36,8 +36,7 @@ main(int argc, char*argv[]){
       fd_set master;
       // create timeout struct
     	struct timeval timeout;
-      // sets the max descriptor
-    	int fdmax;
+
 
     	// empty the descriptor set
     	FD_ZERO(&backup);
@@ -45,8 +44,8 @@ main(int argc, char*argv[]){
 
     	// Add sockets to set
       // FD_SET(file descriptor, SET)
-      FD_SET(TXdata->GetSocket(),&backup);
-    	FD_SET(RXdata->GetSocket(),&backup);
+      FD_SET(Client->GetSocket(),&backup);
+    	FD_SET(Server->GetSocket(),&backup);
 
       // set timeout
       // timeout set to 1 minute
@@ -54,8 +53,9 @@ main(int argc, char*argv[]){
       timeout.tv_usec = 0; // microseconds
 
       //keep track of the largest file descriptor
-      fdmax = RXdata->GetSocket();
-      
+      // sets the max descriptor
+    	int fdmax = Server->GetSocket();
+
       whie(1){
       // back up the file descriptors
       // If the descriptors are not backed up, the descriptors will be modified
@@ -84,11 +84,11 @@ main(int argc, char*argv[]){
         // if descriptor is in the set
         if (FD_ISSET(i, &master)){
           // if descriptor is equal to your specified socket
-          if(i == TXdata->Socket()){
+          if(i == Client->Socket()){
             // do something
           }
           // if descriptor is equal to your specified socket
-          else if(i == RXdata->Socket()){
+          else if(i == Server->Socket()){
             // do something
           }
         }
