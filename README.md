@@ -1,9 +1,8 @@
 # simple-select
 A tutorial on using select() for linux sockets
-- Assuming a socket connection is established using TCP
 
 Sockets
-- Sockets should be created beforehand
+- Create two socket connections
 
 Initialization
 - Create 2 fd_sets one for back up and one for the while loop
