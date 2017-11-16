@@ -16,25 +16,13 @@
 main(int argc, char*argv[]){
       int rc;
 
-      //create sockets
-      Server *TXcmd = new Server(7006);
-      //set each socket to non-blocking mode
-    	rc = fcntl(TXcmd->GetSocket(),F_SETFL,O_NONBLOCK);
-    	if (rc < 0){
-	    	 perror("Error setting socket to non-blocking");
-	    	exit(3);
-    	}
+      // create socket connections
     	Client *RXdata = new Client(connectionIP,7008);
+      // set each socket to non-blocking mode
       rc = fcntl(RXdata->GetSocket(),F_SETFL,O_NONBLOCK);
     	if (rc < 0){
 	    	 perror("Error setting socket to non-blocking");
 	    	exit(3);
-    	}
-    	Server *RXcmd = new Server(7007);
-    	rc = fcntl(RXcmd->GetSocket(),F_SETFL,O_NONBLOCK);
-    	if (rc < 0){
-		      perror("Error setting socket to non-blocking");
-	    	    exit(3);
     	}
 	    Client *TXdata = new Client(connectionIP, 7005);
       rc = fcntl(TXdata->GetSocket(),F_SETFL,O_NONBLOCK);
@@ -57,8 +45,6 @@ main(int argc, char*argv[]){
 
     	// Add sockets to set
       // FD_SET(file descriptor, SET)
-    	FD_SET(TXcmd->GetSocket(),&backup);
-    	FD_SET(RXcmd->GetSocket(),&backup);
       FD_SET(TXdata->GetSocket(),&backup);
     	FD_SET(RXdata->GetSocket(),&backup);
 
@@ -69,18 +55,16 @@ main(int argc, char*argv[]){
 
       //keep track of the largest file descriptor
       fdmax = RXdata->GetSocket();
-
-
-
+      
       whie(1){
       // back up the file descriptors
       // If the descriptors are not backed up, the descriptors will be modified
       // by select after every iteration
       memcpy(&master, &backup, sizeof(backup));
 
-
-      // select(int maxfd, fd_set *readset, fd_set *writeset, fd_set *exceptset
+      // select(int maxfd, fd_set *readset, fd_set *writeset, fd_set *exceptset,
       // const struct timeval *timeout)
+      // the +1 in maxfd is because POSIX checks for maxfd -1
       rc = select(fdmax + 1, &master, NULL, NULL, timeout);
       // select returns positive for ready file descriptor
       // returns 0 on timeout
@@ -92,7 +76,7 @@ main(int argc, char*argv[]){
       }
 
       // This can be used to see if it timed out can be used in the receiver
-      //if (rc == 0){	}
+      // if (rc == 0){	}
 
       // loop through the available file descriptors and see which is ready
       int i;
@@ -100,19 +84,11 @@ main(int argc, char*argv[]){
         // if descriptor is in the set
         if (FD_ISSET(i, &master)){
           // if descriptor is equal to your specified socket
-          if(i == TXcmd->Socket()){
-            // do something
-          }
-          // if descriptor is equal to your specified socket
           if(i == TXdata->Socket()){
             // do something
           }
           // if descriptor is equal to your specified socket
-          if(i == RXcmd->Socket()){
-            // do something
-          }
-          // if descriptor is equal to your specified socket
-          if(i == RXdata->Socket()){
+          else if(i == RXdata->Socket()){
             // do something
           }
         }
